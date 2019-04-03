@@ -57,6 +57,8 @@ def preprocess_github_dataset(argv=None):
       logging.info("Reading data using a query.")
       input_records = (pipeline
         | "Read Github Dataset" >> gh_bq.ReadGithubDataset(args.project))
+    
+    logging.info("token_pairs_table: %s %s", str(type(args.token_pairs_table)), str(args.token_pairs_table))
     token_pairs = (input_records
       | "Transform Github Dataset" >> github_dataset.TransformGithubDataset(
                 args.token_pairs_table, args.failed_tokenize_table)

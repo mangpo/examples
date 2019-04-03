@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: t2t-code-search-exporter
+  name: t2t-code-search-exporter-{{EXPERIMENT}}
+  namespace: kubeflow
+spec:
+  template:
+    metadata:
+      labels:
+        app: t2t-code-search-exporter
+    spec:
+      containers:
+      - command:
+        - t2t-exporter
+        - --problem={{T2T_PROBLEM}}
+        - --data_dir={{DATA_DIR}}
+        - --output_dir={{WORKING_DIR}}/output
+        - --model={{T2T_MODEL}}
+        - --hparams_set={{HPARAMS_SET}}
+        - --t2t_usr_dir=/src/code_search/t2t
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/gcp-credentials/user-gcp-sa.json
+        image: gcr.io/kubeflow-examples/code-search@sha256:c9d879bcdcbc176721d95c1c0e0b00034cdbeb800b4733a9d5f3cb853f406559
+        name: exporter
+        volumeMounts:
+        - mountPath: /secret/gcp-credentials
+          name: gcp-credentials
+        workingDir: /src
+      restartPolicy: OnFailure
+      volumes:
+      - name: gcp-credentials
+        secret:
+          secretName: user-gcp-sa
+          

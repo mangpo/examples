@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: t2t-code-search-trainer
+  name: t2t-code-search-trainer-{{EXPERIMENT}}
+  namespace: kubeflow
+spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - t2t-trainer
+            - --problem={{T2T_PROBLEM}}
+            - --model={{T2T_MODEL}}
+            - --hparams_set={{HPARAMS_SET}}
+            - --data_dir={{DATA_DIR}}
+            - --output_dir={{WORKING_DIR}}/output
+            - --train_steps={{TRAIN_STEPS}}
+            - --eval_steps={{EVAL_STEPS}}
+            - --t2t_usr_dir=/app/code_search/t2t
+            - --schedule=train
+            env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secret/gcp-credentials/user-gcp-sa.json
+            image: gcr.io/kubeflow-examples/code-search@sha256:c9d879bcdcbc176721d95c1c0e0b00034cdbeb800b4733a9d5f3cb853f406559
+            name: tensorflow
+            volumeMounts:
+            - mountPath: /secret/gcp-credentials
+              name: gcp-credentials
+          restartPolicy: OnFailure
+          volumes:
+          - name: gcp-credentials
+            secret:
+              secretName: user-gcp-sa

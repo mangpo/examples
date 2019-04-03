@@ -1,0 +1,48 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: embed-code
+  name: embed-code-{{EXPERIMENT}}
+  namespace: kubeflow
+spec:
+  backoffLimit: 0
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: embed-code
+    spec:
+      containers:
+      - command:
+        - python2
+        - -m
+        - code_search.dataflow.cli.create_function_embeddings
+        - --runner=DataflowRunner
+        - --project={{PROJECT}}
+        - --function_embeddings_table={{PROJECT}}:{{BQ_TARGET_DATASET}}.code_embeddings_{{EXPERIMENT}}
+        - --output_dir={{EMBEDDING_DIR}}
+        - --data_dir={{DATA_DIR}}
+        - --problem={{T2T_PROBLEM}}
+        - --job_name=submit-code-embeddings-job-{{EXPERIMENT}}
+        - --saved_model_dir={{MODEL_DIR}}
+        - --temp_location={{WORKING_DIR}}/dataflow/temp
+        - --staging_location={{WORKING_DIR}}/dataflow/staging
+        - --worker_machine_type=n1-highcpu-32
+        - --num_workers=5
+        - --requirements_file=requirements.dataflow.txt
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/gcp-credentials/user-gcp-sa.json
+        image: gcr.io/kubeflow-examples/code-search-dataflow:v20181204-ee47a49-dirty-f4045c
+        name: dataflow
+        volumeMounts:
+        - mountPath: /secret/gcp-credentials
+          name: gcp-credentials
+        workingDir: /src
+      restartPolicy: Never
+      volumes:
+      - name: gcp-credentials
+        secret:
+          secretName: user-gcp-sa
