@@ -30,7 +30,6 @@ metadata:
       service: query-embed-server.kubeflow:8500
   labels:
     app: query-embed-server
-    ksonnet.io/component: query-embed-server
   name: query-embed-server
   namespace: kubeflow
 spec:
@@ -53,7 +52,6 @@ kind: Deployment
 metadata:
   labels:
     app: query-embed-server
-    ksonnet.io/component: query-embed-server
   name: query-embed-server
   namespace: kubeflow
 spec:
