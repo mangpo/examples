@@ -1,0 +1,43 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: create-search-index
+  name: create-search-index-{{EXPERIMENT}}
+  namespace: kubeflow
+spec:
+  backoffLimit: 0
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: create-search-index-{{EXPERIMENT}}
+    spec:
+      containers:
+      - command:
+        - python
+        - -m
+        - code_search.nmslib.cli.create_search_index
+        - --data_dir={{EMBEDDING_DIR}}
+        - --lookup_file={{LOOKUP_FILE}}
+        - --index_file={{INDEX_FILE}}
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/gcp-credentials/user-gcp-sa.json
+        image: gcr.io/kubeflow-examples/code-search-dataflow:v20181204-ee47a49-dirty-f4045c
+        name: dataflow
+        resources:
+          limits:
+            memory: 100Gi
+          requests:
+            memory: 32Gi
+        volumeMounts:
+        - mountPath: /secret/gcp-credentials
+          name: gcp-credentials
+        workingDir: /src
+      restartPolicy: Never
+      volumes:
+      - name: gcp-credentials
+        secret:
+          secretName: user-gcp-sa

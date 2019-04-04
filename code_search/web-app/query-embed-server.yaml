@@ -1,0 +1,100 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: |-
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name: tfserving-mapping-query-embed-server-get
+      prefix: /models/query-embed-server/
+      rewrite: /
+      method: GET
+      service: query-embed-server.kubeflow:8000
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name: tfserving-mapping-query-embed-server-post
+      prefix: /models/query-embed-server/
+      rewrite: /model/query-embed-server:predict
+      method: POST
+      service: query-embed-server.kubeflow:8000
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name: tfserving-predict-mapping-query-embed-server
+      prefix: tfserving/models/query-embed-server/
+      rewrite: /v1/models/query-embed-server:predict
+      method: POST
+      service: query-embed-server.kubeflow:8500
+  labels:
+    app: query-embed-server
+    ksonnet.io/component: query-embed-server
+  name: query-embed-server
+  namespace: kubeflow
+spec:
+  ports:
+  - name: grpc-tf-serving
+    port: 9000
+    targetPort: 9000
+  - name: http-tf-serving-proxy
+    port: 8000
+    targetPort: 8000
+  - name: tf-serving-builtin-http
+    port: 8500
+    targetPort: 8500
+  selector:
+    app: query-embed-server
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: query-embed-server
+    ksonnet.io/component: query-embed-server
+  name: query-embed-server
+  namespace: kubeflow
+spec:
+  template:
+    metadata:
+      labels:
+        app: query-embed-server
+    spec:
+      containers:
+      - args:
+        - --port=9000
+        - --rest_api_port=8500
+        - --model_name={{T2T_MODEL}}
+        - --model_base_path={{WORKING_DIR}}/output/export
+        command:
+        - /usr/bin/tensorflow_model_server
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/gcp-credentials/key.json
+        image: tensorflow/serving:1.11.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          tcpSocket:
+            port: 9000
+        name: query-embed-server
+        ports:
+        - containerPort: 9000
+        - containerPort: 8500
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        volumeMounts:
+        - mountPath: /secret/gcp-credentials
+          name: gcp-credentials
+      volumes:
+      - name: gcp-credentials
+        secret:
+          secretName: user-gcp-sa

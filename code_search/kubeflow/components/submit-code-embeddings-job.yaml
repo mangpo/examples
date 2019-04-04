@@ -21,7 +21,7 @@ spec:
         - code_search.dataflow.cli.create_function_embeddings
         - --runner=DataflowRunner
         - --project={{PROJECT}}
-        - --function_embeddings_table={{PROJECT}}:{{BQ_TARGET_DATASET}}.code_embeddings_{{EXPERIMENT}}
+        - --function_embeddings_table={{PROJECT}}:{{BQ_TARGET_DATASET}}.function_embeddings
         - --output_dir={{EMBEDDING_DIR}}
         - --data_dir={{DATA_DIR}}
         - --problem={{T2T_PROBLEM}}

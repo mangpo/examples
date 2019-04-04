@@ -7,7 +7,7 @@ import json
 import os
 import sys
 
-params_file = 'kubeflow/components/params.json'
+params_file = 'params.json'
 out_dir = 'jobs'
 
 def configure(path):

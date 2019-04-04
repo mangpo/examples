@@ -49,7 +49,7 @@ class TransformGithubDataset(beam.PTransform):
 
       (tokenize_errors  # pylint: disable=expression-not-assigned
        | "Failed Tokenization" >> beam.io.WriteToBigQuery(table=self.failed_tokenize_table,
-                               schema=failed_tokenize_table_schema,
+                               schema=failed_tokenize_table_schema.table_schema,
                                create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
                                write_disposition=beam.io.BigQueryDisposition.WRITE_EMPTY)
 
@@ -77,7 +77,7 @@ class TransformGithubDataset(beam.PTransform):
       ])
       (flat_rows  # pylint: disable=expression-not-assigned
         | "Save Tokens" >>  beam.io.WriteToBigQuery(table=self.pairs_table,
-                               schema=tokenize_table_schema,
+                               schema=tokenize_table_schema.table_schema,
                                create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
                                write_disposition=beam.io.BigQueryDisposition.WRITE_EMPTY)
       )
