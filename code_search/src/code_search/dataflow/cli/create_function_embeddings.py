@@ -48,7 +48,8 @@ def create_function_embeddings(argv=None):
   embeddings = (token_pairs
     | "Compute Function Embeddings" >> func_embed.FunctionEmbeddings(args.problem,
                                                                      args.data_dir,
-                                                                     args.saved_model_dir)
+                                                                     args.saved_model_dir,
+                                                                     True)
   )
 
   function_embeddings_schema = bigquery.BigQuerySchema([

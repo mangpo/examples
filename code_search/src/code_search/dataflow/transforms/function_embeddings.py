@@ -18,18 +18,19 @@ class FunctionEmbeddings(beam.PTransform):
       "project:dataset.table"
   """
 
-  def __init__(self, problem, data_dir, saved_model_dir):
+  def __init__(self, problem, data_dir, saved_model_dir, embed_function):
     super(FunctionEmbeddings, self).__init__()
 
     self.problem = problem
     self.data_dir = data_dir
     self.saved_model_dir = saved_model_dir
+    self.embed_function = embed_function
 
   def expand(self, input_or_inputs):
     batch_predict = (input_or_inputs
       | "Encoded Function Tokens" >> beam.ParDo(func_embeddings.EncodeFunctionTokens(
-        self.problem, self.data_dir))
-      | "Compute Function Embeddings" >> beam.ParDo(pred.PredictionDoFn(),
+          self.problem, self.data_dir, self.embed_function))
+      | "Compute Function Embeddings" >> beam.ParDo(pred.PredictionDoFn(), # TODO: embed string?
                                                     self.saved_model_dir).with_outputs('err',
                                                                                        main='main')
     )
@@ -37,7 +38,7 @@ class FunctionEmbeddings(beam.PTransform):
     predictions = batch_predict.main
 
     formatted_predictions = (predictions
-      | "Process Function Embeddings" >> beam.ParDo(func_embeddings.ProcessFunctionEmbedding())
+      | "Process Function Embeddings" >> beam.ParDo(func_embeddings.ProcessFunctionEmbedding(self.embed_function))
     )
 
     return formatted_predictions

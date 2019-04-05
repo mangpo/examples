@@ -112,14 +112,14 @@ push-cpu: build-cpu
 	@echo Pushed $(IMG):$(TAG)
 
 push-gpu: build-gpu
-	gcloud docker --authorize-only
+	gcloud auth configure-docker
 	docker push $(IMG)-gpu:$(TAG)
 	@echo Pushed $(IMG)-gpu:$(TAG)
 
 push-trainer: push-cpu push-gpu
 
 push-dataflow: build-dataflow
-	gcloud docker --authorize-only
+	gcloud auth configure-docker
 	docker push $(IMG)-dataflow:$(TAG)
 	@echo Pushed $(IMG)-dataflow:$(TAG)
 

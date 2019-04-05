@@ -6,24 +6,29 @@ from code_search.t2t.query import get_encoder, encode_query
 
 
 class EncodeFunctionTokens(beam.DoFn):
-  """Encode function tokens.
+  """Encode function or docstring tokens.
 
-  This DoFn prepares the function tokens for
+  This DoFn prepares the tokens for
   inference by a SavedModel estimator downstream.
 
   Args:
     problem: A string representing the registered Tensor2Tensor Problem.
     data_dir: A string representing the path to data directory.
   """
-  def __init__(self, problem, data_dir):
+  def __init__(self, problem, data_dir, encode_function):
     super(EncodeFunctionTokens, self).__init__()
 
     self.problem = problem
     self.data_dir = data_dir
+    self.encode_function = encode_function
 
   @property
   def function_tokens_key(self):
     return u'function_tokens'
+
+  @property
+  def docstring_tokens_key(self):
+    return u'docstring_tokens'
 
   @property
   def instances_key(self):
@@ -32,9 +37,9 @@ class EncodeFunctionTokens(beam.DoFn):
   def process(self, element, *_args, **_kwargs):
     """Encode the function instance.
 
-    This DoFn takes a tokenized function string and
+    This DoFn takes a tokenized function or doc string and
     encodes them into a base64 string of TFExample
-    binary format. The "function_tokens" are encoded
+    binary format. The "function_tokens" or "docstring_tokens" are encoded
     and stored into the "instances" key in a format
     ready for consumption by TensorFlow SavedModel
     estimators. The encoder is provided by a
@@ -72,8 +77,10 @@ class EncodeFunctionTokens(beam.DoFn):
         }
     """
     encoder = get_encoder(self.problem, self.data_dir)
-    encoded_function = encode_query(encoder, True,
-                                    element.get(self.function_tokens_key))
+    encoded_function = encode_query(encoder, self.encode_function,
+                                    element.get(self.function_tokens_key
+                                                if self.encode_function
+                                                else self.docstring_tokens_key))
 
     element[self.instances_key] = [{'input': {'b64': encoded_function}}]
     yield element
@@ -86,10 +93,17 @@ class ProcessFunctionEmbedding(beam.DoFn):
   results from a SavedModel estimator which are
   returned by the PredictionDoFn.
   """
+  def __init__(self, encode_function=True):
+    super(ProcessFunctionEmbedding, self).__init__()
+    self.encode_function = encode_function
 
   @property
   def function_embedding_key(self):
     return 'function_embedding'
+
+  @property
+  def docstring_embedding_key(self):
+    return 'docstring_embedding'
 
   @property
   def predictions_key(self):
@@ -105,9 +119,9 @@ class ProcessFunctionEmbedding(beam.DoFn):
     ]
 
   def process(self, element, *_args, **_kwargs):
-    """Post-Process Function embedding.
+    """Post-Process embedding.
 
-    This converts the incoming function instance
+    This converts the incoming instance
     embedding into a serializable string for downstream
     tasks. It also pops any extraneous keys which are
     no more required. The "lineno" key is also converted
@@ -153,7 +167,8 @@ class ProcessFunctionEmbedding(beam.DoFn):
         }
     """
     prediction = element.get(self.predictions_key)[0]['outputs']
-    element[self.function_embedding_key] = ','.join([
+    element[self.function_embedding_key if self.encode_function
+            else self.docstring_embedding_key] = ','.join([
       str(val).decode('utf-8') for val in prediction
     ])
 
