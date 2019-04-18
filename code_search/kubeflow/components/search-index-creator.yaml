@@ -8,7 +8,6 @@ metadata:
   namespace: kubeflow
 spec:
   backoffLimit: 0
-  replicas: 1
   template:
     metadata:
       labels:
@@ -29,9 +28,9 @@ spec:
         name: dataflow
         resources:
           limits:
-            memory: 100Gi
+            memory: 30Gi
           requests:
-            memory: 32Gi
+            memory: 16Gi
         volumeMounts:
         - mountPath: /secret/gcp-credentials
           name: gcp-credentials

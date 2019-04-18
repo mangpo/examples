@@ -5,7 +5,7 @@
     "bq_target_dataset": "code_search",
     "data_dir": "gs://code-search/20190402/data",
     "working_dir": "gs://code-search/20190402/working",
-    "model_dir": "gs://code-search/20190402/working/output/export/1533685294",
+    "model_dir": "gs://code-search/20190402/working/output/export/1554499879",
     "embedding_dir": "gs://code-search/20190402/code_embeddings",
     "lookup_file": "gs://code-search/20190402/code_embeddings-index/embedding-to-info.csv",
     "index_file": "gs://code-search/20190402/code_embeddings-index/embeddings.index",
