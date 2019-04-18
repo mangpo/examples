@@ -65,6 +65,11 @@ def add_parser_arguments(parser):
   predict_args_parser.add_argument('--output_dir', metavar='', type=str,
                                    help='Path to directory where the output '
                                         'should should be written.')
+  predict_args_parser.add_argument('--eval_dir', metavar='', type=str,
+                                   help='Path to directory where the evaluation result '
+                                        'should should be written.')
+  predict_args_parser.add_argument('--tmp_dir', metavar='', type=str,
+                                   help='Path to a temporary directory.')
 
 def prepare_pipeline_opts(argv=None):
   """Prepare pipeline options from CLI arguments.

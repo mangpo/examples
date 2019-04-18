@@ -48,3 +48,21 @@ class DictToCSVString(beam.DoFn):
       csv_string = stream.getvalue().strip('\r\n')
 
     yield csv_string
+
+
+class TopFunctionsToCSVString(beam.DoFn):
+  def __init__(self. k):
+    self.k = k
+
+  def process(self, org_results_pair, *_args, **_kwargs):
+    fieldnames = ['org'] + range(self.k)
+    element = {'org': org_results_pair[0]['original_function']}
+    results = org_results_pair[1]
+    for i in range(self.k):
+      element[i] = "score: %f | " % results[i]['score'] + results[i]['original_function']
+    with io.BytesIO() as stream:
+      writer = csv.DictWriter(stream, fieldnames)
+      writer.writerow(element)
+      csv_string = stream.getvalue().strip('\r\n')
+
+    yield csv_string

@@ -164,6 +164,8 @@ class ProcessFunctionEmbedding(beam.DoFn):
           "lineno": "STRING",
           "original_function": "STRING",
           "function_embedding": "STRING",
+          OR
+          "docstring_embedding": "STRING",
         }
     """
     prediction = element.get(self.predictions_key)[0]['outputs']

@@ -15,3 +15,26 @@ class FunctionsRetrieval(beam.PTransform):
       | "Retrieve most relevant functions" >> beam.ParDo(retrieve_funcs.RetrieveFunctions(self.index_file, self.lookup_data, self.k)))
 
     return batch_functions
+
+
+class FRank(beam.PTransform):
+  """Find the rank of the original function."""
+
+  def expand(self, org_results_pair):
+    frank = (org_results_pair,
+      | "Compute FRank" >> beam.ParDo(retrieve_funcs.FRank()))
+
+    return frank
+
+
+class WithinTop(beam.PTransform):
+  """Determine if the frank is within a given list of cutoffs."""
+
+  def __init__(self, cutoffs):
+    self.cutoffs = cutoffs
+
+  def expand(self, frank):
+    answers = (frank,
+      | "Check FRank Within Cutoffs" >> beam.ParDo(retrieve_funcs.WithinCutoffs(self.cutoffs)))
+
+    return answers

@@ -1,12 +1,17 @@
 """Dataflow job to evaluate the model for retrieving code from natural language queary."""
 import logging
-
+import csv
+import os
+import tensorflow as tf
 import apache_beam as beam
 
 import code_search.dataflow.cli.arguments as arguments
-import code_search.dataflow.transforms.string_embeddings as string_embed
+import code_search.dataflow.do_fns.dict_to_csv as dict_to_csv
+import code_search.dataflow.transforms.function_embeddings as function_embed
+import code_search.dataflow.transforms.retrieve_functions as retrieve_functions
 
-num_test = 100000
+num_test = 10
+k = 10
 
 def evaluate_model(argv=None):
   pipeline_opts = arguments.prepare_pipeline_opts(argv)
@@ -33,13 +38,57 @@ def evaluate_model(argv=None):
 
   # Emded string queries.
   embeddings = (token_pairs
-    | "Compute Docstring Embeddings" >> string_embed.FunctionEmbeddings(args.problem,
+    | "Compute Docstring Embeddings" >> function_embed.FunctionEmbeddings(args.problem,
                                                                        args.data_dir,
                                                                        args.saved_model_dir,
                                                                        False)
   )
 
   # For each query, find the top K most relevant functions according to the model.
+  if not os.path.isdir(args.tmp_dir):
+    os.makedirs(args.tmp_dir)
+
+  logging.info('Reading %s', args.lookup_file)
+  lookup_data = []
+  with tf.gfile.Open(args.lookup_file) as lookup_file:
+    reader = csv.reader(lookup_file)
+    for row in reader:
+      lookup_data.append(row)
+
+  tmp_index_file = os.path.join(args.tmp_dir, os.path.basename(args.index_file))
+
+  logging.info('Reading %s', args.index_file)
+  if not os.path.isfile(tmp_index_file):
+    tf.gfile.Copy(args.index_file, tmp_index_file)
+
+  top_k_functions = (embeddings
+    | "Retreive Top K Functions" >> retrieve_functions.FunctionsRetrieval(
+        index_file, lookup_data, k)
+  )
+
+  # frank = (top_k_functions
+  #   | "Compute FRank" >> retrieve_functions.FRank())
+
+  # mean_frank = (frank
+  #  | "Compute average FRank" >> beam.CombineValues(beam.combiners.MeanCombineFn()))
+  # logging.info(mean_frank)
+
+  # with_top_1 = (
+  #   | "Compute Within Top K" >> retrieve_functions.WithinTop([1, 5, 10]))
+
+  (top_k_functions  # pylint: disable=expression-not-assigned
+    | "Format for CSV Write" >> beam.ParDo(dict_to_csv.TopFunctionsToCSVString(10))
+    | "Write CSV" >> beam.io.WriteToText('{}/top-functions'.format(args.eval_dir),
+                                         file_name_suffix='.csv',
+                                         num_shards=1)
+  )
+
+  result = pipeline.run()
+  logging.info("Submitted Dataflow job: %s", result)
+  if args.wait_until_finished:
+    result.wait_until_finish()
+
+  return result
 
 
 if __name__ == '__main__':

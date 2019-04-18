@@ -1,0 +1,45 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: evaluation
+  name: evaluation-{{EXPERIMENT}}
+  namespace: kubeflow
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: evaluation
+    spec:
+      containers:
+      - command:
+        - python2
+        - -m
+        - code_search.dataflow.cli.evaluate_model
+        - --runner=DataflowRunner
+        - --project={{PROJECT}}
+	- --token_pairs_table={{PROJECT}}:{{BQ_TARGET_DATASET}}.token_pairs
+        - --data_dir={{DATA_DIR}}
+        - --tmp_dir={{WORKING_DIR}}/search/temp
+        - --saved_model_dir={{MODEL_DIR}}
+        - --lookup_file={{LOOKUP_FILE}}
+        - --index_file={{INDEX_FILE}}
+        - --worker_machine_type=n1-highcpu-32
+        - --num_workers=5
+        - --requirements_file=requirements.dataflow.txt
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/gcp-credentials/user-gcp-sa.json
+        image: gcr.io/kubeflow-examples/code-search-dataflow:v20181204-ee47a49-dirty-f4045c
+        name: dataflow
+        volumeMounts:
+        - mountPath: /secret/gcp-credentials
+          name: gcp-credentials
+        workingDir: /src
+      restartPolicy: Never
+      volumes:
+      - name: gcp-credentials
+        secret:
+          secretName: user-gcp-sa
