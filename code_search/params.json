@@ -13,6 +13,8 @@
     "t2t_model": "kf_similarity_transformer",
     "train_steps": 200000,
     "eval_steps": 100,
-    "hparams_set": "transformer_tiny"
+    "hparams_set": "transformer_tiny",
+    "image_t2t": "gcr.io/kubeflow-examples/code-search@sha256:c9d879bcdcbc176721d95c1c0e0b00034cdbeb800b4733a9d5f3cb853f406559",
+    "image_dataflow": "mangpo/code-search-dataflow:v20190403-c47d689-dirty-39d50d"
   }
 }

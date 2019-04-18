@@ -32,7 +32,7 @@ spec:
         env:
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /secret/gcp-credentials/user-gcp-sa.json
-        image: mangpo/code-search-dataflow:v20190403-c47d689-dirty-39d50d
+        image: {{IMAGE_DATAFLOW}}
         name: dataflow
         volumeMounts:
         - mountPath: /secret/gcp-credentials
