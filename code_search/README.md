@@ -25,6 +25,8 @@ This example uses large amounts of computation and cost several hundred dollars 
   must be authenticated and authorized. See
   [Authentication Overview](https://cloud.google.com/docs/authentication/).
   
+* In addition to [the APIs required by kubeflow](https://www.kubeflow.org/docs/gke/deploy/project-setup/), this example requires Dataflow API. Enable [Dataflow API](https://console.cloud.google.com/apis/library/dataflow.googleapis.com) on your GCP account.
+  
 # Getting Started
 
 To get started, follow the instructions below.
