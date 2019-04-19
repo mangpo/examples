@@ -24,7 +24,7 @@ spec:
         env:
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /secret/gcp-credentials/user-gcp-sa.json
-        image: gcr.io/kubeflow-examples/code-search-dataflow:v20181204-ee47a49-dirty-f4045c
+        image: {{IMAGE_DATAFLOW}}
         name: dataflow
         resources:
           limits:

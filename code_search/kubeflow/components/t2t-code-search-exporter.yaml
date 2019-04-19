@@ -23,7 +23,7 @@ spec:
         env:
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /secret/gcp-credentials/user-gcp-sa.json
-        image: gcr.io/kubeflow-examples/code-search@sha256:c9d879bcdcbc176721d95c1c0e0b00034cdbeb800b4733a9d5f3cb853f406559
+        image: {{IMAGE_T2T}}
         name: exporter
         volumeMounts:
         - mountPath: /secret/gcp-credentials
