@@ -34,9 +34,9 @@ class ReadGithubDataset(bq_transform.BigQueryRead):
       FROM
         `bigquery-public-data.github_repos.files` AS f
       JOIN
-        `bigquery-public-data.github_repos.contents` AS c
-      ON
-        f.id = c.id
+        `bigquery-public-data.github_repos.contents` AS c ON f.id = c.id
+      JOIN 
+        `bigquery-public-data.github_repos.licenses` AS l ON l.repo_name = f.repo_name
       JOIN (
           --this part of the query makes sure repo is watched at least twice since 2017
         SELECT
@@ -64,6 +64,12 @@ class ReadGithubDataset(bq_transform.BigQueryRead):
       WHERE
         f.path LIKE '%.py' AND --with python extension
         c.size < 15000 AND --get rid of ridiculously long files
+        (l.license LIKE 'artistic-%' OR l.license = 'isc' OR l.license = 'mit' --Notice
+        OR l.license LIKE 'apache-%' OR l.license LIKE 'bsd-%' --Notice
+        OR l.license LIKE 'cc0-%' OR l.license = 'unlicense' --Unencumbered
+        OR l.license LIKE 'epl-%' OR l.license LIKE 'mpl-%' --Reciprocal
+        OR l.license LIKE 'gpl-%'  OR l.license LIKE 'lgpl-%' --Restricted
+        ) AND
         REGEXP_CONTAINS(c.content, r'def ') --contains function definition
       GROUP BY
         c.content
