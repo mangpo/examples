@@ -67,8 +67,8 @@ class ReadGithubDataset(bq_transform.BigQueryRead):
         (l.license LIKE 'artistic-%' OR l.license = 'isc' OR l.license = 'mit' --Notice
         OR l.license LIKE 'apache-%' OR l.license LIKE 'bsd-%' --Notice
         OR l.license LIKE 'cc0-%' OR l.license = 'unlicense' --Unencumbered
-        OR l.license LIKE 'epl-%' OR l.license LIKE 'mpl-%' --Reciprocal
-        OR l.license LIKE 'gpl-%'  OR l.license LIKE 'lgpl-%' --Restricted
+        --OR l.license LIKE 'epl-%' OR l.license LIKE 'mpl-%' --Reciprocal
+        --OR l.license LIKE 'gpl-%'  OR l.license LIKE 'lgpl-%' --Restricted
         ) AND
         REGEXP_CONTAINS(c.content, r'def ') --contains function definition
       GROUP BY

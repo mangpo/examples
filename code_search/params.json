@@ -1,20 +1,20 @@
 {
   "current": {
     "project": "smart-code-search",
-    "experiment": "demo20190402",
+    "experiment": "data20190528",
     "bq_target_dataset": "code_search",
-    "data_dir": "gs://code-search/20190402/data",
-    "working_dir": "gs://code-search/20190402/working",
-    "model_dir": "gs://code-search/20190402/working/output/export/1554499879",
-    "embedding_dir": "gs://code-search/20190402/code_embeddings",
-    "lookup_file": "gs://code-search/20190402/code_embeddings-index/embedding-to-info.csv",
-    "index_file": "gs://code-search/20190402/code_embeddings-index/embeddings.index",
+    "data_dir": "gs://code-search/20190528/data",
+    "working_dir": "gs://code-search/20190528/working",
+    "model_dir": "gs://code-search/20190528/working/output/export/1554499879",
+    "embedding_dir": "gs://code-search/20190528/code_embeddings",
+    "lookup_file": "gs://code-search/20190528/code_embeddings-index/embedding-to-info.csv",
+    "index_file": "gs://code-search/20190528/code_embeddings-index/embeddings.index",
     "t2t_problem": "kf_github_function_docstring",
     "t2t_model": "kf_similarity_transformer",
     "train_steps": 200000,
     "eval_steps": 100,
     "hparams_set": "transformer_tiny",
     "image_t2t": "gcr.io/kubeflow-examples/code-search@sha256:c9d879bcdcbc176721d95c1c0e0b00034cdbeb800b4733a9d5f3cb853f406559",
-    "image_dataflow": "mangpo/code-search-dataflow:v20190403-c47d689-dirty-39d50d"
+    "image_dataflow": "mangpo/code-search-dataflow:v20190528-5765a99-dirty-c8b3c9"
   }
 }
